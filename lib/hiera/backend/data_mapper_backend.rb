@@ -22,10 +22,11 @@ class Hiera
           yamlfile = Backend.datafile(:data_mapper, scope, source, "yaml") || next
           yamlfile = File.expand_path(yamlfile)
           Hiera.debug("Looking for datamappings in #{yamlfile}")
-
           next unless File.exist?(yamlfile)
 
           data = @cache.read(yamlfile, Hash, {}) do |data|
+            # this is where the magic happens, we convert the mappings
+            # file into something key'ed off the data hiera will be looking up
             raw_data = YAML.load(data)
             data_mapping_hiera_style = {}
             abort('Expected data to be a hash, not ') unless raw_data.is_a?(Hash)
