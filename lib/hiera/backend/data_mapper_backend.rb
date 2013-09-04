@@ -21,19 +21,19 @@ class Hiera
 
           yamlfile = Backend.datafile(:data_mapper, scope, source, "yaml") || next
           yamlfile = File.expand_path(yamlfile)
-          Hiera.debug("Looking for datamappings in #{yamlfile}")
           next unless File.exist?(yamlfile)
+          Hiera.debug("Looking for datamappings in #{yamlfile}")
 
           data = @cache.read(yamlfile, Hash, {}) do |data|
             # this is where the magic happens, we convert the mappings
             # file into something key'ed off the data hiera will be looking up
             raw_data = YAML.load(data)
             data_mapping_hiera_style = {}
-            abort('Expected data to be a hash, not ') unless raw_data.is_a?(Hash)
+            raise(Exception, "Expected data to be a hash, not #{raw_data.class}") unless raw_data.is_a?(Hash)
             raw_data.each do |k,v|
-              abort('key must be a string or array') unless (v.is_a?(String) or v.is_a?(Array))
+              raise(Exception, 'key must be a string or array') unless (v.is_a?(String) or v.is_a?(Array))
               Array(v).each do |e|
-                abort("Data #{e} maps to multiple hiera keys") if data_mapping_hiera_style[e]
+                raise(Exception, "Data #{e} maps to multiple hiera keys") if data_mapping_hiera_style[e]
                 data_mapping_hiera_style[e] = k
               end
             end
@@ -45,12 +45,40 @@ class Hiera
 
           Hiera.debug("Found #{key} in #{source}")
 
-          answer = Backend.parse_answer(data[key], scope)
+          # I am not sure if I need to perform variable based interpolation on keys
+          #answer = Backend.parse_answer(data[key], scope)
+          answer = data[key]
 
         end
-        Hiera.debug("key #{key} will be looked up as hiera key #{answer}")
+        Hiera.debug("key #{key} will be looked up as hiera key #{answer}") if answer
 
-        @yaml_backend.lookup(answer, scope, order_override, resolution_type)
+        if answer =~ /%\{([^\}]*)\}/
+          result = ''
+          answer.gsub(/%\{([^\}]*)\}/) do
+            name = $1
+            @yaml_backend.lookup(
+              name,
+              scope,
+              order_override,
+              resolution_type
+            ) 
+          end 
+        else
+    	  @yaml_backend.lookup(
+    	    (answer || key),
+    	    scope,
+    	    order_override,
+    	    resolution_type
+    	  )
+        end
+      end
+
+
+      #
+      #
+      #
+      def process_keys(data)
+        
 
       end
 
