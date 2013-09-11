@@ -56,13 +56,16 @@ class Hiera
           result = ''
           answer.gsub(/%\{([^\}]*)\}/) do
             name = $1
+            # TODO I am not sure if this is the correct order.
+            # should I check scoped variables before or after I
+            # check the yaml backend? It is currently after
             @yaml_backend.lookup(
               name,
               scope,
               order_override,
               resolution_type
-            ) 
-          end 
+            ) || scope[name]
+          end
         else
     	  @yaml_backend.lookup(
     	    (answer || key),
