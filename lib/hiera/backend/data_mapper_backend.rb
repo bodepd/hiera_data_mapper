@@ -48,6 +48,7 @@ class Hiera
           # I am not sure if I need to perform variable based interpolation on keys
           #answer = Backend.parse_answer(data[key], scope)
           answer = data[key]
+          break
 
         end
         Hiera.debug("key #{key} will be looked up as hiera key #{answer}") if answer
