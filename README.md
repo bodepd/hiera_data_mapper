@@ -46,7 +46,7 @@ The data mapper is a hiera based implementation of the above mentioned data-mapp
 
 ## configuring the data mapper
 
-The data mapping backend requires the following thigns are configured
+The data mapping backend requires the following things are configured
 in your hiera.yaml
 
 ### backend
@@ -71,7 +71,7 @@ resolve it's data mappings.
 
 ### yaml
 
-The data mapper backend still reiles on yaml for its actual lookups so
+The data mapper backend still relies on yaml for its actual lookups so
 the yaml backend still needs to be configured with its datadir.
 
     :yaml:
